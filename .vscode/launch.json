@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FTPServer",
+            "request": "launch",
+            "mainClass": "FTPServer"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - FTPClient",
+            "request": "launch",
+            "mainClass": "FTPClient"
+        }
+    ]
+}
