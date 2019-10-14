@@ -26,12 +26,17 @@ class FTPClient {
         if (sentence.startsWith("connect")) {
             String serverName = tokens.nextToken(); // pass the connect command
             serverName = tokens.nextToken();
-            port1 = Integer.parseInt(tokens.nextToken());
+            int port1 = Integer.parseInt(tokens.nextToken());
             System.out.println("You are connected to " + serverName);
+            notEnd = true;
 
             Socket ControlSocket = new Socket(serverName, port1);
 
+
             while (isOpen && clientgo) {
+
+                System.out.println("What would you like to do next?" +
+                        "\nlist || retr: file.txt || stor: file.txt  || close");
 
                 DataOutputStream outToServer = new DataOutputStream(
                         ControlSocket.getOutputStream());
@@ -41,9 +46,10 @@ class FTPClient {
 
                 sentence = inFromUser.readLine();
 
-                if (sentence.equals("list:")) {
+                // Listing Files
+                if (sentence.equals("list")) {
 
-                    port = port + 2;
+                    int port = port1 + 2;
                     outToServer.writeBytes(port + " " + sentence + " " + '\n');
 
                     ServerSocket welcomeData = new ServerSocket(port);
@@ -51,21 +57,124 @@ class FTPClient {
 
                     DataInputStream inData = new DataInputStream(
                             new BufferedInputStream(dataSocket.getInputStream()));
+                    notEnd = true;
+
+                    // Server will send 'eof' when it is done sending files
                     while (notEnd) {
                         modifiedSentence = inData.readUTF();
-                        //........................................
-                        //........................................
+                        if(modifiedSentence.compareTo("eof") == 0)
+                            notEnd = false;
+                        else
+                            System.out.println(modifiedSentence);
                     }
-
-
                     welcomeData.close();
                     dataSocket.close();
-                    System.out.println("\nWhat would you like to do next: \n retr: file.txt ||stor: file.txt  || close");
-
-                } else if (sentence.startsWith("retr: ")) {
-
+                    inData.close();
                 }
+
+                else if (sentence.startsWith("retr: ")) {
+
+                    int port = port1 + 2;
+
+                    outToServer.writeBytes(port + " " + sentence + " " +
+                            '\n');
+                    ServerSocket welcomeData = new ServerSocket(port);
+                    Socket dataSocket = welcomeData.accept();
+
+                    DataInputStream inData = new DataInputStream(
+                            new BufferedInputStream(dataSocket.getInputStream()));
+
+                    DataOutputStream outData = new DataOutputStream(
+                            dataSocket.getOutputStream());
+
+                    // Parse filename from command, send it to server
+                    String fileName = sentence.substring(
+                            sentence.lastIndexOf(" ") + 1);
+                    outData.writeUTF(fileName);
+
+                    boolean fileExists = (inData.readUTF().compareTo("200") == 0);
+
+                    // Check file exists
+                    if(fileExists) {
+                        // Receive file
+                        OutputStream fileOut = new FileOutputStream(
+                                "../client_data/" + fileName);
+
+                        byte[] bytes = new byte[16 * 1024];
+                        int count;
+                        while ((count = inData.read(bytes)) > 0) {
+                            fileOut.write(bytes, 0, count);
+                        }
+                        fileOut.close();
+                    }
+                    // If file does not exist, print error.
+                    else
+                        System.out.println("File " + fileName + " not found.");
+                    dataSocket.close();
+                    outData.close();
+                    inData.close();
+                }
+
+                else if(sentence.startsWith("stor:")){
+                    int port = port1 + 2;
+
+                    outToServer.writeBytes(port + " " + sentence + " " +
+                            '\n');
+                    ServerSocket welcomeData = new ServerSocket(port);
+                    Socket dataSocket = welcomeData.accept();
+
+
+                    DataOutputStream dataOutputStream = new DataOutputStream(
+                            dataSocket.getOutputStream());
+
+                    // Parse for file name to store
+                    String fileName = sentence.substring(
+                            sentence.lastIndexOf(" ") + 1);
+                    File toStore = new File("../client_data/" + fileName);
+
+                    // Check that it is a file
+                    if(toStore.isFile()) {
+
+                        // Send 200 on successful file find
+                        dataOutputStream.writeUTF("200");
+
+                        // Send file name
+                        dataOutputStream.writeUTF(fileName);
+
+                        // Find file length
+                        long length = toStore.length();
+                        byte[] bytes = new byte[16 * 1024];
+
+                        // Instantiate file and output sockets
+                        InputStream in = new FileInputStream(toStore);
+                        OutputStream out = dataSocket.getOutputStream();
+
+                        // Write bytes from file to output
+                        int count;
+                        while ((count = in.read(bytes)) > 0) {
+                            out.write(bytes, 0, count);
+                        }
+                        out.close();
+                        in.close();
+                    }
+                    else{
+                        // Send 500 as response code if not found
+                        dataOutputStream.writeUTF("500");
+                        System.out.println("File not found.");
+                    }
+                    dataSocket.close();
+                }
+
+                else if(sentence.startsWith("close")){
+
+                    int port = port1 + 2;
+                    outToServer.writeBytes(port + " " + sentence + " " + '\n');
+                    isOpen = false;
+                    clientgo = false;
+                    ControlSocket.close();
+            }
+
             }
         }
     }
-}//....................................................
+}
