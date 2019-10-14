@@ -48,24 +48,22 @@ class FTPClient {
 
                 // Listing Files
                 if (sentence.equals("list")) {
-
                     int port = port1 + 2;
                     outToServer.writeBytes(port + " " + sentence + " " + '\n');
-
                     ServerSocket welcomeData = new ServerSocket(port);
                     Socket dataSocket = welcomeData.accept();
-
                     DataInputStream inData = new DataInputStream(
                             new BufferedInputStream(dataSocket.getInputStream()));
                     notEnd = true;
-
                     // Server will send 'eof' when it is done sending files
                     while (notEnd) {
                         modifiedSentence = inData.readUTF();
-                        if(modifiedSentence.compareTo("eof") == 0)
+                        if(modifiedSentence.compareTo("eof") == 0){
                             notEnd = false;
-                        else
+                        }
+                        else{
                             System.out.println(modifiedSentence);
+                        }
                     }
                     welcomeData.close();
                     dataSocket.close();
@@ -110,6 +108,7 @@ class FTPClient {
                     // If file does not exist, print error.
                     else
                         System.out.println("File " + fileName + " not found.");
+                    welcomeData.close();
                     dataSocket.close();
                     outData.close();
                     inData.close();
@@ -163,6 +162,7 @@ class FTPClient {
                         System.out.println("File not found.");
                     }
                     dataSocket.close();
+                    welcomeData.close();
                 }
 
                 else if(sentence.startsWith("close")){
