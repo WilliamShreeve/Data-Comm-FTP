@@ -15,7 +15,7 @@ class FTPClient {
         boolean notEnd = true;
         String statusCode;
         boolean clientgo = true;
-
+        int port1;
 
         BufferedReader inFromUser = new BufferedReader(
                 new InputStreamReader(System.in));
@@ -26,14 +26,14 @@ class FTPClient {
         if (sentence.startsWith("connect")) {
             String serverName = tokens.nextToken(); // pass the connect command
             serverName = tokens.nextToken();
-            int port1 = Integer.parseInt(tokens.nextToken());
-            System.out.println("You are connected to " + serverName);
-            notEnd = true;
-
-            Socket ControlSocket = new Socket(serverName, port1);
-
-
+            port1 = Integer.parseInt(tokens.nextToken());
+            
+            
             while (isOpen && clientgo) {
+                System.out.println("You are connected to " + serverName);
+                notEnd = true;
+    
+                Socket ControlSocket = new Socket(serverName, port1);
 
                 System.out.println("What would you like to do next?" +
                         "\nlist || retr: file.txt || stor: file.txt  || close");
