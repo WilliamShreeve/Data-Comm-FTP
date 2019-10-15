@@ -17,7 +17,6 @@ public class WorkerThread implements Runnable {
         try {
             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-
             fromClient = inFromClient.readLine();
 
             StringTokenizer tokens = new StringTokenizer(fromClient);

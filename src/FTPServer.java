@@ -4,8 +4,7 @@ import java.util.*;
 
 public class FTPServer {
 
-    public static void main(String argv[]) throws IOException {
-        
+    public static void main(String argv[]) throws IOException {        
         ServerSocket welcomeSocket = new ServerSocket(12000);
 
         while (true) {

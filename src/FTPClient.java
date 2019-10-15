@@ -22,7 +22,6 @@ class FTPClient {
         sentence = inFromUser.readLine();
         StringTokenizer tokens = new StringTokenizer(sentence);
 
-
         if (sentence.startsWith("connect")) {
             String serverName = tokens.nextToken(); // pass the connect command
             serverName = tokens.nextToken();
