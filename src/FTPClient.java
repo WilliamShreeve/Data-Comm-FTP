@@ -157,7 +157,7 @@ class FTPClient {
                     }
                     else{
                         // Send 500 as response code if not found
-                        dataOutputStream.writeUTF("500");
+                        dataOutputStream.writeUTF("550");
                         System.out.println("File not found.");
                     }
                     dataSocket.close();
